@@ -14,7 +14,7 @@
     <projectUrl>https://github.com/devjoes/DockerComposeFixture</projectUrl>
     <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <dependencies>
-      <dependency id="xunit" version="[3.0.0]" />
+      <dependency id="xunit" version="3.0.0" />
     </dependencies>
   </metadata>
   <files>
