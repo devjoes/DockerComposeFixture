@@ -18,36 +18,31 @@ namespace DockerComposeFixture.Compose
             this.startInfo = processStartInfo;
         }
 
-        public async Task Execute()
+        public void Execute()
         {
+            void LogData(object sender, DataReceivedEventArgs e)
+            {
+                if (e.Data != null)
+                {
+                    this.observers.ForEach(o => o.OnNext(e.Data));
+                }
+            }
+
             var process = new Process { StartInfo = this.startInfo };
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.UseShellExecute = false;
+            process.EnableRaisingEvents = true;
 
-            var tProcess = new Task(() => process.Start());
-            tProcess.Start();
-            await Task.Delay(10);
-            var tOutput = new Task(() => this.MonitorStream(process, process.StandardOutput));
-            var tErr = new Task(() => this.MonitorStream(process, process.StandardError));
+            process.OutputDataReceived += LogData;
+            process.ErrorDataReceived += LogData;
 
-            tOutput.Start();
-            tErr.Start();
+            process.Start();
+            process.BeginOutputReadLine();
+            process.WaitForExit();
+            process.CancelOutputRead();
 
-            await Task.WhenAll(new[] { tOutput, tErr, tProcess });
             this.observers.ForEach(o => o.OnCompleted());
-        }
-
-        private void MonitorStream(Process process, StreamReader reader)
-        {
-            do
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    this.observers.ForEach(o => o.OnNext(line));
-                }
-            } while (!process.HasExited);
         }
 
         public IDisposable Subscribe(IObserver<string> observer)

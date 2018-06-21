@@ -35,7 +35,7 @@ namespace DockerComposeFixture.Compose
         {
             var runner = new ProcessRunner(processStartInfo);
             runner.Subscribe(this.Logger);
-            runner.Execute().Wait();
+            runner.Execute();
         }
 
         public int PauseMs => 1000;
@@ -55,10 +55,9 @@ namespace DockerComposeFixture.Compose
 
             runner.Subscribe(this.Logger);
             runner.Subscribe(observerToQueue);
-            runner.Execute().Wait();
+            runner.Execute();
             return observerToQueue.Queue.ToArray();
         }
-        
     }
 }
 
