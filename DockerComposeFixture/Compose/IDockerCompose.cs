@@ -1,6 +1,7 @@
 ﻿using DockerComposeFixture.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DockerComposeFixture.Compose
 {
@@ -9,7 +10,7 @@ namespace DockerComposeFixture.Compose
         void Init(string dockerComposeArgs, string dockerComposeUpArgs, string dockerComposeDownArgs);
         void Down();
         IEnumerable<string> Ps();
-        void Up();
+        Task Up();
         int PauseMs { get; }
         ILogger Logger { get; }
     }

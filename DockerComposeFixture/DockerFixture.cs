@@ -181,10 +181,15 @@ namespace DockerComposeFixture
             }
 
             this.logger.Log("---- starting docker services ----");
-            this.dockerCompose.Up();
+            var upTask = this.dockerCompose.Up();
 
             for (int i = 0; i < this.startupTimeoutSecs; i++)
             {
+                if (upTask.IsCompleted)
+                {
+                    this.logger.Log("docker-compose exited prematurely");
+                    break;
+                }
                 this.logger.Log("---- checking docker services ----");
                 Thread.Sleep(this.dockerCompose.PauseMs);
                 if (this.customUpTest != null)

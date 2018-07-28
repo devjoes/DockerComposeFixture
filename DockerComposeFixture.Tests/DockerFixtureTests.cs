@@ -15,13 +15,17 @@ namespace DockerComposeFixture.Tests
 {
     public class DockerFixtureTests
     {
+        private const int NumberOfMsInOneSec = 10; // makes testing faster
+        private const int ComposeUpRunDurationMs = 5000;
+
         [Fact]
         public void Init_StopsDocker_IfAlreadyRunning()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
             compose.Setup(c => c.Ps())
                 .Returns(new[] { "--------", " Up ", " Up " });
+            compose.Setup(c => c.Up()).Returns(Task.Delay(ComposeUpRunDurationMs));
 
             new DockerFixture()
                 .Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object);
@@ -34,10 +38,11 @@ namespace DockerComposeFixture.Tests
         public void Init_InitialisesDocker_WhenCalled()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
             compose.SetupSequence(c => c.Ps())
                 .Returns(new[] { "--------" })
                 .Returns(new[] { "--------", " Up ", " Up " });
+            compose.Setup(c => c.Up()).Returns(Task.Delay(ComposeUpRunDurationMs));
 
             var tmp = Path.GetTempFileName();
             new DockerFixture()
@@ -50,13 +55,15 @@ namespace DockerComposeFixture.Tests
         public void InitOnce_InitialisesDockerOnce_WhenCalledTwice()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
+            compose.Setup(c => c.Up()).Returns(Task.Delay(ComposeUpRunDurationMs));
             compose.SetupSequence(c => c.Ps())
                 .Returns(new[] { "--------" })
                 .Returns(new[] { "--------", " Up ", " Up " });
 
             var tmp = Path.GetTempFileName();
             var fixture = new DockerFixture();
+
             fixture.InitOnce(() => new DockerFixtureOptions { DockerComposeFiles = new[] { tmp } }, compose.Object);
             fixture.InitOnce(() => new DockerFixtureOptions { DockerComposeFiles = new[] { tmp } }, compose.Object);
             compose.Verify(c => c.Init(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
@@ -67,7 +74,8 @@ namespace DockerComposeFixture.Tests
         public void Init_Waits_UntilUpTestIsTrue()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
+            compose.Setup(c => c.Up()).Returns(Task.Delay(5000));
             compose.Setup(c => c.Ps())
                 .Returns(new[] { "--------", " Up ", " Up " });
             const string successText = "Everything is up";
@@ -92,7 +100,7 @@ namespace DockerComposeFixture.Tests
         public void Init_Throws_IfTestIsNeverTrue()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
             compose.Setup(c => c.Ps())
                 .Returns(new[] { "--------", " Up ", " Up " });
             const string successText = "Everything is up";
@@ -122,7 +130,9 @@ namespace DockerComposeFixture.Tests
             Stopwatch stopwatch = new Stopwatch();
             var compose = new Mock<IDockerCompose>();
             compose.Setup(c => c.PauseMs).Returns(100);
-            compose.Setup(c => c.Up()).Callback(() => stopwatch.Start());
+            compose.Setup(c => c.Up())
+                .Returns(Task.Delay(ComposeUpRunDurationMs))
+                .Callback(() => stopwatch.Start());
             compose.Setup(c => c.Ps()).Returns(() =>
             {
                 if (!stopwatch.IsRunning)
@@ -151,7 +161,7 @@ namespace DockerComposeFixture.Tests
         public void Init_Throws_WhenServicesFailToStart()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
             bool firstTime = true;
             compose.Setup(c => c.Ps())
                 .Returns(() =>
@@ -165,11 +175,24 @@ namespace DockerComposeFixture.Tests
                 new DockerFixture().Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object));
         }
 
+
+        [Fact]
+        public void Init_Throws_DockerComposeExitsPrematurely()
+        {
+            var compose = new Mock<IDockerCompose>();
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
+            compose.Setup(c => c.Up()).Returns(Task.CompletedTask);
+            
+            Assert.Throws<DockerComposeException>(() =>
+                new DockerFixture().Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object));
+            compose.Verify(c => c.Ps(), Times.Once);
+        }
+
         [Fact]
         public void Init_Throws_WhenYmlFileDoesntExist()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
             compose.Setup(c => c.Ps())
                 .Returns(new[] { "--------", " Up ", " Up " });
 
@@ -214,7 +237,8 @@ namespace DockerComposeFixture.Tests
         public void Dispose_CallsDown_WhenRun()
         {
             var compose = new Mock<IDockerCompose>();
-            compose.Setup(c => c.PauseMs).Returns(100);
+            compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
+            compose.Setup(c => c.Up()).Returns(Task.Delay(ComposeUpRunDurationMs));
             compose.SetupSequence(c => c.Ps())
                 .Returns(new[] { "--------" })
                 .Returns(new[] { "--------", " Up ", " Up " });

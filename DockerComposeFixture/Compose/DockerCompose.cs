@@ -25,10 +25,10 @@ namespace DockerComposeFixture.Compose
             this.dockerComposeDownArgs = dockerComposeDownArgs;
         }
 
-        public void Up()
+        public Task Up()
         {
             var start = new ProcessStartInfo("docker-compose", $"{this.dockerComposeArgs} up {this.dockerComposeUpArgs}");
-            Task.Run(() =>  this.RunProcess(start) );
+            return Task.Run(() =>  this.RunProcess(start) );
         }
 
         private void RunProcess(ProcessStartInfo processStartInfo)
