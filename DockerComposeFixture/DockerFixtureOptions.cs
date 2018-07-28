@@ -33,8 +33,17 @@ namespace DockerComposeFixture
         /// </summary>
         public string DockerComposeDownArgs { get; set; } = "--remove-orphans";
 
+        /// <summary>
+        /// How many seconds to wait for the application to start before giving up. (Default is 120.)
+        /// </summary>
+        public int StartupTimeoutSecs { get; set; } = 120;
+
         public void Validate()
         {
+            if (this.StartupTimeoutSecs < 1)
+            {
+                throw new ArgumentException(nameof(this.StartupTimeoutSecs));
+            }
             if (this.DockerComposeFiles == null
                 || this.DockerComposeFiles.Length == 0)
             {

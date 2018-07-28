@@ -18,6 +18,7 @@ namespace DockerComposeFixture
         private Func<List<string>, bool> customUpTest;
         private bool initialised;
         private ILogger logger;
+        private int startupTimeoutSecs;
 
         /// <summary>
         /// Initialize docker compose services from file(s) but only once.
@@ -66,7 +67,7 @@ namespace DockerComposeFixture
             string logFile = options.DebugLog
                 ? Path.Combine(Path.GetTempPath(), $"docker-compose-{DateTime.Now.Ticks}.log")
                 : null;
-            this.Init(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs, options.CustomUpTest, dockerCompose, new Logger(logFile));
+            this.Init(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs, options.StartupTimeoutSecs, options.CustomUpTest, dockerCompose, new Logger(logFile));
         }
 
         /// <summary>
@@ -75,16 +76,20 @@ namespace DockerComposeFixture
         /// <param name="dockerComposeFiles">Array of docker compose files</param>
         /// <param name="dockerComposeUpArgs">Arguments to append after 'docker-compose -f file.yml up'</param>
         /// <param name="dockerComposeDownArgs">Arguments to append after 'docker-compose -f file.yml down'</param>
+        /// <param name="startupTimeoutSecs">How long to wait for the application to start before giving up</param>
         /// <param name="customUpTest">Checks whether the docker-compose services have come up correctly based upon the output of docker-compose</param>
         /// <param name="dockerCompose"></param>
         /// <param name="logger"></param>
-        public void Init(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs, Func<List<string>, bool> customUpTest = null, IDockerCompose dockerCompose = null, ILogger logger = null)
+        public void Init(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs,
+            int startupTimeoutSecs, Func<List<string>, bool> customUpTest = null,
+            IDockerCompose dockerCompose = null, ILogger logger = null)
         {
             this.logger = logger ?? new Logger(null);
             
             var dockerComposeFilePaths = dockerComposeFiles.Select(this.GetComposeFilePath);
             this.dockerCompose = dockerCompose ?? new DockerCompose(this.logger);
             this.customUpTest = customUpTest;
+            this.startupTimeoutSecs = startupTimeoutSecs;
 
             this.dockerCompose.Init(
                 string.Join(" ",
@@ -178,7 +183,7 @@ namespace DockerComposeFixture
             this.logger.Log("---- starting docker services ----");
             this.dockerCompose.Up();
 
-            for (int i = 0; i < 120; i++)
+            for (int i = 0; i < this.startupTimeoutSecs; i++)
             {
                 this.logger.Log("---- checking docker services ----");
                 Thread.Sleep(this.dockerCompose.PauseMs);

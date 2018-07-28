@@ -10,6 +10,7 @@ namespace DockerComposeFixture
         bool DebugLog { get; set; }
         string DockerComposeUpArgs { get; set; }
         string DockerComposeDownArgs { get; set; }
+        int StartupTimeoutSecs { get; set; }
 
         void Validate();
 
