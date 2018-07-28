@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
+using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -18,7 +20,7 @@ namespace DockerComposeFixture.Logging
 
         public void OnCompleted()
         {
-            
+
         }
 
         public void OnError(Exception error)
