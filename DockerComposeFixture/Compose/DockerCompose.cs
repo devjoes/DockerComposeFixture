@@ -12,7 +12,7 @@ namespace DockerComposeFixture.Compose
 {
     public class DockerCompose : IDockerCompose
     {
-        public DockerCompose(ILogger logger)
+        public DockerCompose(ILogger[] logger)
         {
             this.Logger = logger;
         }
@@ -25,21 +25,24 @@ namespace DockerComposeFixture.Compose
             this.dockerComposeDownArgs = dockerComposeDownArgs;
         }
 
-        public void Up()
+        public Task Up()
         {
             var start = new ProcessStartInfo("docker-compose", $"{this.dockerComposeArgs} up {this.dockerComposeUpArgs}");
-            Task.Run(() =>  this.RunProcess(start) );
+            return Task.Run(() =>  this.RunProcess(start) );
         }
 
         private void RunProcess(ProcessStartInfo processStartInfo)
         {
             var runner = new ProcessRunner(processStartInfo);
-            runner.Subscribe(this.Logger);
+            foreach (var logger in this.Logger)
+            {
+                runner.Subscribe(logger);
+            }
             runner.Execute();
         }
 
         public int PauseMs => 1000;
-        public ILogger Logger { get; }
+        public ILogger[] Logger { get; }
 
         public void Down()
         {
@@ -53,7 +56,10 @@ namespace DockerComposeFixture.Compose
             var runner = new ProcessRunner(ps);
             var observerToQueue = new ObserverToQueue<string>();
 
-            runner.Subscribe(this.Logger);
+            foreach (var logger in this.Logger)
+            {
+                runner.Subscribe(logger);
+            }
             runner.Subscribe(observerToQueue);
             runner.Execute();
             return observerToQueue.Queue.ToArray();

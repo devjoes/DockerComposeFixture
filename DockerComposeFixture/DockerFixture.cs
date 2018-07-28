@@ -9,15 +9,23 @@ using System.Threading.Tasks;
 using DockerComposeFixture.Compose;
 using DockerComposeFixture.Exceptions;
 using DockerComposeFixture.Logging;
+using Xunit.Abstractions;
 
 namespace DockerComposeFixture
 {
     public class DockerFixture : IDisposable
     {
         private IDockerCompose dockerCompose;
-        private Func<List<string>, bool> customUpTest;
+        private Func<string[], bool> customUpTest;
         private bool initialised;
-        private ILogger logger;
+        private ILogger[] loggers;
+        private int startupTimeoutSecs;
+        private readonly IMessageSink output;
+
+        public DockerFixture(IMessageSink output)
+        {
+            this.output = output;
+        }
 
         /// <summary>
         /// Initialize docker compose services from file(s) but only once.
@@ -58,15 +66,31 @@ namespace DockerComposeFixture
         /// Initialize docker compose services from file(s).
         /// </summary>
         /// <param name="setupOptions">Options that control how docker-compose is executed</param>
-        /// <param name="dockerCompose"></param>
-        public void Init(Func<IDockerFixtureOptions> setupOptions, IDockerCompose dockerCompose)
+        /// <param name="compose"></param>
+        public void Init(Func<IDockerFixtureOptions> setupOptions, IDockerCompose compose)
         {
             var options = setupOptions();
             options.Validate();
             string logFile = options.DebugLog
                 ? Path.Combine(Path.GetTempPath(), $"docker-compose-{DateTime.Now.Ticks}.log")
                 : null;
-            this.Init(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs, options.CustomUpTest, dockerCompose, new Logger(logFile));
+
+            this.Init(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs,
+                options.StartupTimeoutSecs, options.CustomUpTest, compose, this.GetLoggers(logFile).ToArray());
+        }
+
+        private IEnumerable<ILogger> GetLoggers(string file)
+        {
+            yield return new ListLogger();
+            yield return new ConsoleLogger();
+            if (this.output != null)
+            {
+                yield return new XUnitLogger(this.output);
+            }
+            if (!string.IsNullOrEmpty(file))
+            {
+                yield return new FileLogger(file);
+            }
         }
 
         /// <summary>
@@ -75,16 +99,20 @@ namespace DockerComposeFixture
         /// <param name="dockerComposeFiles">Array of docker compose files</param>
         /// <param name="dockerComposeUpArgs">Arguments to append after 'docker-compose -f file.yml up'</param>
         /// <param name="dockerComposeDownArgs">Arguments to append after 'docker-compose -f file.yml down'</param>
+        /// <param name="startupTimeoutSecs">How long to wait for the application to start before giving up</param>
         /// <param name="customUpTest">Checks whether the docker-compose services have come up correctly based upon the output of docker-compose</param>
         /// <param name="dockerCompose"></param>
         /// <param name="logger"></param>
-        public void Init(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs, Func<List<string>, bool> customUpTest = null, IDockerCompose dockerCompose = null, ILogger logger = null)
+        public void Init(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs,
+            int startupTimeoutSecs, Func<string[], bool> customUpTest = null,
+            IDockerCompose dockerCompose = null, ILogger[] logger = null)
         {
-            this.logger = logger ?? new Logger(null);
-            
+            this.loggers = logger ?? GetLoggers(null).ToArray();
+
             var dockerComposeFilePaths = dockerComposeFiles.Select(this.GetComposeFilePath);
-            this.dockerCompose = dockerCompose ?? new DockerCompose(this.logger);
+            this.dockerCompose = dockerCompose ?? new DockerCompose(this.loggers);
             this.customUpTest = customUpTest;
+            this.startupTimeoutSecs = startupTimeoutSecs;
 
             this.dockerCompose.Init(
                 string.Join(" ",
@@ -171,35 +199,43 @@ namespace DockerComposeFixture
         {
             if (this.CheckIfRunning().hasContainers)
             {
-                this.logger.Log("---- stopping already running docker services ----");
+                this.loggers.Log("---- stopping already running docker services ----");
                 this.Stop();
             }
 
-            this.logger.Log("---- starting docker services ----");
-            this.dockerCompose.Up();
+            this.loggers.Log("---- starting docker services ----");
+            var upTask = this.dockerCompose.Up();
 
-            for (int i = 0; i < 120; i++)
+            for (int i = 0; i < this.startupTimeoutSecs; i++)
             {
-                this.logger.Log("---- checking docker services ----");
-                Thread.Sleep(this.dockerCompose.PauseMs);
-                var (hasContainers, containersAreUp) = this.CheckIfRunning();
-                if (hasContainers && containersAreUp)
+                if (upTask.IsCompleted)
                 {
-                    this.logger.Log("---- docker services are up ----");
-                    if (this.customUpTest == null)
+                    this.loggers.Log("docker-compose exited prematurely");
+                    break;
+                }
+                this.loggers.Log($"---- checking docker services ({i + 1}/{this.startupTimeoutSecs}) ----");
+                Thread.Sleep(this.dockerCompose.PauseMs);
+                if (this.customUpTest != null)
+                {
+                    if (this.customUpTest(this.loggers.GetLoggedLines()))
                     {
+                        this.loggers.Log("---- custom up test satisfied ----");
                         return;
                     }
-                    if (this.customUpTest(this.logger.ConsoleOutput))
+                }
+                else
+                {
+                    var (hasContainers, containersAreUp) = this.CheckIfRunning();
+                    if (hasContainers && containersAreUp)
                     {
-                        this.logger.Log("---- custom up test satisfied ----");
+                        this.loggers.Log("---- docker services are up ----");
                         return;
                     }
                 }
             }
-            throw new DockerComposeException(this.logger);
+            throw new DockerComposeException(this.loggers.GetLoggedLines());
         }
-        
+
         private (bool hasContainers, bool containersAreUp) CheckIfRunning()
         {
             var lines = this.dockerCompose.Ps().ToList()
