@@ -12,7 +12,7 @@ namespace DockerComposeFixture
         /// <summary>
         /// Checks whether the docker-compose services have come up correctly based upon the output of docker-compose
         /// </summary>
-        public Func<List<string>, bool> CustomUpTest { get; set; }
+        public Func<string[], bool> CustomUpTest { get; set; }
 
         /// <summary>
         /// Array of docker compose files

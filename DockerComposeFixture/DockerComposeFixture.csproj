@@ -18,4 +18,8 @@ Made it not rebuild on every test run</PackageReleaseNotes>
     <AssemblyVersion>1.0.11.0</AssemblyVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.4.0" />
+  </ItemGroup>
+
 </Project>

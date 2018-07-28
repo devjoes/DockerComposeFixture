@@ -12,6 +12,6 @@ namespace DockerComposeFixture.Compose
         IEnumerable<string> Ps();
         Task Up();
         int PauseMs { get; }
-        ILogger Logger { get; }
+        ILogger[] Logger { get; }
     }
 }

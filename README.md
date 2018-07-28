@@ -1,7 +1,7 @@
-# DockerComposeFixture
+# Docker Compose Fixture
 A XUnit fixture that allows you to spin up docker compose files and then run tests against them.
 
-# Example Integration Test
+## Example Integration Test
 
     public class IntegrationTests : IClassFixture<DockerFixture>
     {
@@ -16,3 +16,8 @@ A XUnit fixture that allows you to spin up docker compose files and then run tes
 
         // Tests go here
     }
+
+## Logging
+To enable XUnit logging you will have to add a xunit.runner.json file to your test project. The file should be copied to the output directory and should look like this:
+    
+    { "diagnosticMessages":  true }

@@ -27,7 +27,7 @@ namespace DockerComposeFixture.Tests
                 .Returns(new[] { "--------", " Up ", " Up " });
             compose.Setup(c => c.Up()).Returns(Task.Delay(ComposeUpRunDurationMs));
 
-            new DockerFixture()
+            new DockerFixture(null)
                 .Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object);
             compose.Verify(c => c.Init(It.IsAny<string>(), "up", "down"), Times.Once);
             compose.Verify(c => c.Down(), Times.Once);
@@ -45,7 +45,7 @@ namespace DockerComposeFixture.Tests
             compose.Setup(c => c.Up()).Returns(Task.Delay(ComposeUpRunDurationMs));
 
             var tmp = Path.GetTempFileName();
-            new DockerFixture()
+            new DockerFixture(null)
                 .Init(new[] { tmp }, "up", "down", 120, null, compose.Object);
             compose.Verify(c => c.Init($"-f \"{tmp}\"", "up", "down"), Times.Once);
             compose.Verify(c => c.Up(), Times.Once);
@@ -62,7 +62,7 @@ namespace DockerComposeFixture.Tests
                 .Returns(new[] { "--------", " Up ", " Up " });
 
             var tmp = Path.GetTempFileName();
-            var fixture = new DockerFixture();
+            var fixture = new DockerFixture(null);
 
             fixture.InitOnce(() => new DockerFixtureOptions { DockerComposeFiles = new[] { tmp } }, compose.Object);
             fixture.InitOnce(() => new DockerFixtureOptions { DockerComposeFiles = new[] { tmp } }, compose.Object);
@@ -80,12 +80,12 @@ namespace DockerComposeFixture.Tests
                 .Returns(new[] { "--------", " Up ", " Up " });
             const string successText = "Everything is up";
 
-            var logger = new Logger(null);
+            var logger = new ListLogger();
             var task = new Task(() =>
-                 new DockerFixture()
+                 new DockerFixture(null)
                     .Init(new[] { Path.GetTempFileName() }, "up", "down", 120,
                         outputLinesFromUp => outputLinesFromUp.Contains(successText),
-                        compose.Object, logger));
+                        compose.Object, new []{ logger}));
             task.Start();
             Thread.Sleep(100);
             logger.OnNext("foo");
@@ -104,13 +104,13 @@ namespace DockerComposeFixture.Tests
             compose.Setup(c => c.Ps())
                 .Returns(new[] { "--------", " Up ", " Up " });
             const string successText = "Everything is up";
-            var logger = new Logger(null);
-            compose.SetupGet(c => c.Logger).Returns(logger);
+            var logger = new ListLogger();
+            compose.SetupGet(c => c.Logger).Returns(new []{ logger});
 
             Assert.Throws<AggregateException>(() =>
             {
                 var task = new Task(() =>
-                    new DockerFixture()
+                    new DockerFixture(null)
                         .Init(new[] { Path.GetTempFileName() }, "up", "down", 120,
                             outputLinesFromUp => outputLinesFromUp.Contains(successText),
                             compose.Object));
@@ -150,7 +150,7 @@ namespace DockerComposeFixture.Tests
                 };
             });
 
-            new DockerFixture().Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object);
+            new DockerFixture(null).Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object);
 
             compose.Verify(c => c.Up(), Times.Once);
             compose.Verify(c => c.Ps(), Times.AtLeast(5));
@@ -172,7 +172,7 @@ namespace DockerComposeFixture.Tests
                 });
 
             Assert.Throws<DockerComposeException>(() =>
-                new DockerFixture().Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object));
+                new DockerFixture(null).Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object));
         }
 
 
@@ -184,7 +184,7 @@ namespace DockerComposeFixture.Tests
             compose.Setup(c => c.Up()).Returns(Task.CompletedTask);
             
             Assert.Throws<DockerComposeException>(() =>
-                new DockerFixture().Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object));
+                new DockerFixture(null).Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object));
             compose.Verify(c => c.Ps(), Times.Once);
         }
 
@@ -198,7 +198,7 @@ namespace DockerComposeFixture.Tests
 
             string fileDoesntExist = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Assert.Throws<ArgumentException>(() =>
-                new DockerFixture().Init(new[] { fileDoesntExist }, "up", "down", 120, null, compose.Object));
+                new DockerFixture(null).Init(new[] { fileDoesntExist }, "up", "down", 120, null, compose.Object));
         }
 
         [Fact]
@@ -207,11 +207,11 @@ namespace DockerComposeFixture.Tests
             var compose = new Mock<IDockerCompose>();
 
             Assert.Throws<ArgumentException>(() =>
-                new DockerFixture().Init(
+                new DockerFixture(null).Init(
                     () => new DockerFixtureOptions { DockerComposeFiles = new string[0] },
                     compose.Object));
             Assert.Throws<ArgumentException>(() =>
-                new DockerFixture().Init(
+                new DockerFixture(null).Init(
                     () => new DockerFixtureOptions { DockerComposeFiles = null },
                     compose.Object));
         }
@@ -222,11 +222,11 @@ namespace DockerComposeFixture.Tests
             var compose = new Mock<IDockerCompose>();
             
             Assert.Throws<ArgumentException>(() =>
-                new DockerFixture().Init(
+                new DockerFixture(null).Init(
                     () => new DockerFixtureOptions { DockerComposeFiles = new[] { "docker-compose.yml" }, StartupTimeoutSecs = 0 },
                     compose.Object));
             Assert.Throws<ArgumentException>(() =>
-                new DockerFixture().Init(
+                new DockerFixture(null).Init(
                     () => new DockerFixtureOptions { DockerComposeFiles = new[] { "docker-compose.yml" }, StartupTimeoutSecs = -1 },
                     compose.Object));
         }
@@ -243,7 +243,7 @@ namespace DockerComposeFixture.Tests
                 .Returns(new[] { "--------" })
                 .Returns(new[] { "--------", " Up ", " Up " });
 
-            var fixture = new DockerFixture();
+            var fixture = new DockerFixture(null);
             fixture.Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object);
             fixture.Dispose();
 

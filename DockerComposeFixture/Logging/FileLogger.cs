@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace DockerComposeFixture.Logging
 {
-    public class Logger : ILogger
+    public class FileLogger : ILogger
     {
         private readonly string logfileName;
 
-        public Logger(string logfileName)
+        public FileLogger(string logfileName)
         {
-            this.ConsoleOutput = new List<string>();
             if (logfileName != null)
             {
                 if (File.Exists(logfileName))
@@ -23,10 +22,12 @@ namespace DockerComposeFixture.Logging
         }
         public void OnCompleted()
         {
+            
         }
 
         public void OnError(Exception error)
         {
+            this.Log(error.Message + "\n" + error.StackTrace);
             throw error;
         }
 
@@ -38,22 +39,14 @@ namespace DockerComposeFixture.Logging
 
         public void Log(string msg)
         {
-            Debug.WriteLine(msg);
-            Console.WriteLine(msg);
-            this.ConsoleOutput.Add(msg);
-            if (!string.IsNullOrEmpty(this.logfileName))
+            using (var stream = new FileStream(this.logfileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+            using (var writer = new StreamWriter(stream))
             {
-                using (var stream = new FileStream(this.logfileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
-                using (var writer = new StreamWriter(stream))
-                {
-                    writer.WriteLine(msg);
-                    writer.Flush();
-                    writer.Close();
-                }
+                writer.WriteLine(msg);
+                writer.Flush();
+                writer.Close();
             }
 
         }
-
-        public List<string> ConsoleOutput { get; }
     }
 }

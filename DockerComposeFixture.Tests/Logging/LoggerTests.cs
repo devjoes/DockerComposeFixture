@@ -8,11 +8,16 @@ using System.Threading.Tasks;
 using DockerComposeFixture.Logging;
 using DockerComposeFixture.Tests.Utils;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace DockerComposeFixture.Tests.Logging
 {
     public class LoggerTests
     {
+        public LoggerTests()
+        {
+        }
+
         [Fact]
         public void OnNext_LogsItemsToFile_WhenCalled()
         {
@@ -28,9 +33,13 @@ namespace DockerComposeFixture.Tests.Logging
                 }
             }
 
-            var logger = new Logger(tmpFile);
+            var loggers = new ILogger[]{ new ListLogger(), new FileLogger(tmpFile), new ConsoleLogger() };
             var counter = new ObservableCounter();
-            counter.Subscribe(logger);
+            foreach (var logger in loggers)
+            {
+                counter.Subscribe(logger);
+            }
+            
             var task = new Task(() => counter.Count());
             
             task.Start();
@@ -39,8 +48,8 @@ namespace DockerComposeFixture.Tests.Logging
             Assert.True(GetFileLineCount(tmpFile) < 10);
             task.Wait();
             Assert.Equal(10, GetFileLineCount(tmpFile));
-            Assert.Equal("1,2,3,4,5,6,7,8,9,10".Split(","),
-                File.ReadAllLines(tmpFile));
+            var lines = File.ReadAllLines(tmpFile);
+            Assert.Equal("1,2,3,4,5,6,7,8,9,10".Split(","), lines);
             File.Delete(tmpFile);
         }
     }
