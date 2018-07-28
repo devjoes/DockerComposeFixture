@@ -182,17 +182,20 @@ namespace DockerComposeFixture
             {
                 this.logger.Log("---- checking docker services ----");
                 Thread.Sleep(this.dockerCompose.PauseMs);
-                var (hasContainers, containersAreUp) = this.CheckIfRunning();
-                if (hasContainers && containersAreUp)
+                if (this.customUpTest != null)
                 {
-                    this.logger.Log("---- docker services are up ----");
-                    if (this.customUpTest == null)
-                    {
-                        return;
-                    }
                     if (this.customUpTest(this.logger.ConsoleOutput))
                     {
                         this.logger.Log("---- custom up test satisfied ----");
+                        return;
+                    }
+                }
+                else
+                {
+                    var (hasContainers, containersAreUp) = this.CheckIfRunning();
+                    if (hasContainers && containersAreUp)
+                    {
+                        this.logger.Log("---- docker services are up ----");
                         return;
                     }
                 }

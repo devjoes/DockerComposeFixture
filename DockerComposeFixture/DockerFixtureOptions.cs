@@ -24,14 +24,14 @@ namespace DockerComposeFixture
         public bool DebugLog { get; set; }
         /// <summary>
         /// Arguments to append after 'docker-compose -f file.yml up'
-        /// Default is 'docker-compose -f file.yml up --build'
+        /// Default is 'docker-compose -f file.yml up' you can append '--build' if you want it to always build
         /// </summary>
-        public string DockerComposeUpArgs { get; set; } = "--build";
+        public string DockerComposeUpArgs { get; set; } = "";
         /// <summary>
         /// Arguments to append after 'docker-compose -f file.yml down'
-        /// Default is 'docker-compose -f file.yml down --remove-orphans --rmi all'
+        /// Default is 'docker-compose -f file.yml down --remove-orphans' you can add '--rmi all' if you want to guarantee a fresh build on each test
         /// </summary>
-        public string DockerComposeDownArgs { get; set; } = "--remove-orphans --rmi all";
+        public string DockerComposeDownArgs { get; set; } = "--remove-orphans";
 
         public void Validate()
         {
