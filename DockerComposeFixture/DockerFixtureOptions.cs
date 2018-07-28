@@ -13,11 +13,13 @@ namespace DockerComposeFixture
         /// Checks whether the docker-compose services have come up correctly based upon the output of docker-compose
         /// </summary>
         public Func<List<string>, bool> CustomUpTest { get; set; }
+
         /// <summary>
         /// Array of docker compose files
         /// Files are converted into the arguments '-f file1 -f file2 etc'
+        /// Default is 'docker-compose.yml'
         /// </summary>
-        public string[] DockerComposeFiles { get; set; }
+        public string[] DockerComposeFiles { get; set; } = new[] { "docker-compose.yml" };
         /// <summary>
         /// When true this logs docker-compose output to %temp%\docker-compose-*.log
         /// </summary>

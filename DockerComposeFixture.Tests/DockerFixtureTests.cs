@@ -200,11 +200,11 @@ namespace DockerComposeFixture.Tests
             
             Assert.Throws<ArgumentException>(() =>
                 new DockerFixture().Init(
-                    () => new DockerFixtureOptions { DockerComposeFiles = new[] { "a" }, StartupTimeoutSecs = 0 },
+                    () => new DockerFixtureOptions { DockerComposeFiles = new[] { "docker-compose.yml" }, StartupTimeoutSecs = 0 },
                     compose.Object));
             Assert.Throws<ArgumentException>(() =>
                 new DockerFixture().Init(
-                    () => new DockerFixtureOptions { DockerComposeFiles = new[] { "a" }, StartupTimeoutSecs = -1 },
+                    () => new DockerFixtureOptions { DockerComposeFiles = new[] { "docker-compose.yml" }, StartupTimeoutSecs = -1 },
                     compose.Object));
         }
 
