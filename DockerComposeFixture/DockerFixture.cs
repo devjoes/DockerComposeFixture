@@ -190,7 +190,7 @@ namespace DockerComposeFixture
 
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             this.Stop();
         }
