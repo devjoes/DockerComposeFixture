@@ -11,6 +11,8 @@ namespace DockerComposeFixture
         string DockerComposeUpArgs { get; set; }
         string DockerComposeDownArgs { get; set; }
         int StartupTimeoutSecs { get; set; }
+        
+        IEnumerable<KeyValuePair<string, object>> EnvironmentVariables { get; set; }
 
         void Validate();
 

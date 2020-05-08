@@ -12,10 +12,15 @@ namespace DockerComposeFixture.Compose
 {
     public class DockerCompose : IDockerCompose
     {
-        public DockerCompose(ILogger[] logger)
+        private readonly IEnumerable<KeyValuePair<string, object>> environmentVariables;
+
+        public DockerCompose(ILogger[] logger, IEnumerable<KeyValuePair<string, object>> environmentVariables)
         {
+            this.environmentVariables = environmentVariables;
             this.Logger = logger;
         }
+        public DockerCompose(ILogger[] logger) : this(logger, Enumerable.Empty<KeyValuePair<string, object>>()) {}
+        
         private string dockerComposeArgs,dockerComposeUpArgs, dockerComposeDownArgs;
 
         public void Init(string dockerComposeArgs, string dockerComposeUpArgs, string dockerComposeDownArgs)
@@ -33,6 +38,11 @@ namespace DockerComposeFixture.Compose
 
         private void RunProcess(ProcessStartInfo processStartInfo)
         {
+            foreach (var e in environmentVariables)
+            {
+                processStartInfo.EnvironmentVariables[e.Key] = e.Value.ToString();
+            }
+
             var runner = new ProcessRunner(processStartInfo);
             foreach (var logger in this.Logger)
             {

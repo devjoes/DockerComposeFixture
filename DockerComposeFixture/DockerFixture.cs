@@ -76,7 +76,7 @@ namespace DockerComposeFixture
                 : null;
 
             this.Init(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs,
-                options.StartupTimeoutSecs, options.CustomUpTest, compose, this.GetLoggers(logFile).ToArray());
+                options.StartupTimeoutSecs, options.CustomUpTest, compose, this.GetLoggers(logFile).ToArray(), options.EnvironmentVariables);
         }
 
         private IEnumerable<ILogger> GetLoggers(string file)
@@ -103,14 +103,15 @@ namespace DockerComposeFixture
         /// <param name="customUpTest">Checks whether the docker-compose services have come up correctly based upon the output of docker-compose</param>
         /// <param name="dockerCompose"></param>
         /// <param name="logger"></param>
+        /// <param name="environmentVariables"></param>
         public void Init(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs,
             int startupTimeoutSecs, Func<string[], bool> customUpTest = null,
-            IDockerCompose dockerCompose = null, ILogger[] logger = null)
+            IDockerCompose dockerCompose = null, ILogger[] logger = null, IEnumerable<KeyValuePair<string, object>> environmentVariables = null)
         {
             this.loggers = logger ?? GetLoggers(null).ToArray();
 
             var dockerComposeFilePaths = dockerComposeFiles.Select(this.GetComposeFilePath);
-            this.dockerCompose = dockerCompose ?? new DockerCompose(this.loggers);
+            this.dockerCompose = dockerCompose ?? new DockerCompose(this.loggers, environmentVariables);
             this.customUpTest = customUpTest;
             this.startupTimeoutSecs = startupTimeoutSecs;
 
