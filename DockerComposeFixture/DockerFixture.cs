@@ -27,23 +27,6 @@ namespace DockerComposeFixture
             this.output = output;
         }
 
-        public async Task InitWithRetry(Func<IDockerFixtureOptions> setupOptions, int count)
-        {
-            try
-            {
-                await InitOnceAsync(setupOptions);
-            }
-            catch (DockerComposeException ex)
-            {
-                if (count == 0)
-                {
-                    throw;
-                }
-                this.initialised = false;
-                await InitWithRetry(setupOptions, count - 1);
-            }
-        }
-
         /// <summary>
         /// Initialize docker compose services from file(s) but only once.
         /// If you call this multiple times on the same DockerFixture then it will be ignored.
