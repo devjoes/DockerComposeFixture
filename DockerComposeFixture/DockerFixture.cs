@@ -32,9 +32,9 @@ namespace DockerComposeFixture
         /// If you call this multiple times on the same DockerFixture then it will be ignored.
         /// </summary>
         /// <param name="setupOptions">Options that control how docker-compose is executed.</param>
-        public void InitOnce(Func<IDockerFixtureOptions> setupOptions)
+        public async Task InitOnceAsync(Func<IDockerFixtureOptions> setupOptions)
         {
-            InitOnce(setupOptions, null);
+            await InitOnceAsync(setupOptions, null);
         }
 
         /// <summary>
@@ -43,11 +43,11 @@ namespace DockerComposeFixture
         /// </summary>
         /// <param name="setupOptions">Options that control how docker-compose is executed.</param>
         /// <param name="dockerCompose"></param>
-        public void InitOnce(Func<IDockerFixtureOptions> setupOptions, IDockerCompose dockerCompose)
+        public async Task InitOnceAsync(Func<IDockerFixtureOptions> setupOptions, IDockerCompose dockerCompose)
         {
             if (!this.initialised)
             {
-                this.Init(setupOptions, dockerCompose);
+                await this.InitAsync(setupOptions, dockerCompose);
                 this.initialised = true;
             }
         }
@@ -57,9 +57,9 @@ namespace DockerComposeFixture
         /// Initialize docker compose services from file(s).
         /// </summary>
         /// <param name="setupOptions">Options that control how docker-compose is executed</param>
-        public void Init(Func<IDockerFixtureOptions> setupOptions)
+        public async Task InitAsync(Func<IDockerFixtureOptions> setupOptions)
         {
-            Init(setupOptions, null);
+            await InitAsync(setupOptions, null);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace DockerComposeFixture
         /// </summary>
         /// <param name="setupOptions">Options that control how docker-compose is executed</param>
         /// <param name="compose"></param>
-        public void Init(Func<IDockerFixtureOptions> setupOptions, IDockerCompose compose)
+        public async Task InitAsync(Func<IDockerFixtureOptions> setupOptions, IDockerCompose compose)
         {
             var options = setupOptions();
             options.Validate();
@@ -75,7 +75,7 @@ namespace DockerComposeFixture
                 ? Path.Combine(Path.GetTempPath(), $"docker-compose-{DateTime.Now.Ticks}.log")
                 : null;
 
-            this.Init(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs,
+            await this.InitAsync(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs,
                 options.StartupTimeoutSecs, options.CustomUpTest, compose, this.GetLoggers(logFile).ToArray(), options.EnvironmentVariables);
         }
 
@@ -104,7 +104,7 @@ namespace DockerComposeFixture
         /// <param name="dockerCompose"></param>
         /// <param name="logger"></param>
         /// <param name="environmentVariables"></param>
-        public void Init(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs,
+        public async Task InitAsync(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs,
             int startupTimeoutSecs, Func<string[], bool> customUpTest = null,
             IDockerCompose dockerCompose = null, ILogger[] logger = null, IEnumerable<KeyValuePair<string, object>> environmentVariables = null)
         {
@@ -120,7 +120,7 @@ namespace DockerComposeFixture
                         dockerComposeFilePaths
                             .Select(f => $"-f \"{f}\""))
                     .Trim(), dockerComposeUpArgs, dockerComposeDownArgs);
-            this.Start();
+            await this.StartAsync();
         }
 
         private string GetComposeFilePath(string file)
@@ -196,7 +196,7 @@ namespace DockerComposeFixture
             this.Stop();
         }
 
-        private void Start()
+        private async Task StartAsync()
         {
             if (this.CheckIfRunning().hasContainers)
             {
@@ -215,7 +215,7 @@ namespace DockerComposeFixture
                     break;
                 }
                 this.loggers.Log($"---- checking docker services ({i + 1}/{this.startupTimeoutSecs}) ----");
-                Thread.Sleep(this.dockerCompose.PauseMs);
+                await Task.Delay(1000);
                 if (this.customUpTest != null)
                 {
                     if (this.customUpTest(this.loggers.GetLoggedLines()))
@@ -253,7 +253,5 @@ namespace DockerComposeFixture
         {
             this.dockerCompose.Down();
         }
-
-
     }
 }
