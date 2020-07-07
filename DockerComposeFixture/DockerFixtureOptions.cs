@@ -34,6 +34,8 @@ namespace DockerComposeFixture
         /// Default is 'docker-compose -f file.yml down --remove-orphans' you can add '--rmi all' if you want to guarantee a fresh build on each test
         /// </summary>
         public string DockerComposeDownArgs { get; set; } = "--remove-orphans";
+        
+        public IEnumerable<KeyValuePair<string, object>> EnvironmentVariables { get; set; }
 
         /// <summary>
         /// How many seconds to wait for the application to start before giving up. (Default is 120.)
