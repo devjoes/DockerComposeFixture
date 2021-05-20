@@ -144,8 +144,8 @@ namespace DockerComposeFixture.Tests
                 {
                     "blah",
                     "--------",
-                    $"14f227387e7c\ttestservice1\t\"dotnet TestService.�\"\t20 seconds ago\t{firstServiceStatus}\t0.0.0.0:32769->80/tcp\ttestservice_testservice_1",
-                    $"14f227387e7d\ttestservice2\t\"dotnet TestService.�\"\t20 seconds ago\t{secondServiceStatus}\t0.0.0.0:32769->89/tcp\ttestservice_testservice_2"
+                    $"14f227387e7c\ttestservice1\t\"dotnet TestService...\"\t20 seconds ago\t{firstServiceStatus}\t0.0.0.0:32769->80/tcp\ttestservice_testservice_1",
+                    $"14f227387e7d\ttestservice2\t\"dotnet TestService...\"\t20 seconds ago\t{secondServiceStatus}\t0.0.0.0:32769->89/tcp\ttestservice_testservice_2"
                 };
             });
 
