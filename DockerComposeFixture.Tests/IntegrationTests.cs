@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,14 +11,15 @@ namespace DockerComposeFixture.Tests
     {
         private readonly string dockerComposeFile;
 
-        private const string DockerCompose =
-            "version: '3.4'\n" +
-            "services:\n" +
-            "  echo_server:\n" +
-            "   image: \"hashicorp/http-echo\"\n" +
-            "   ports:\n" +
-            "    - 12871:8080\n" +
-            "   command: -listen=:8080 -text=\"hello world\"";
+        private const string DockerCompose = @"
+version: '3.4'
+services:
+    echo_server:
+        image: hashicorp/http-echo
+        ports:
+        - 12871:8080
+        command: -listen=:8080 -text=""hello world""
+        ";
 
         public IntegrationTests(DockerFixture dockerFixture)
         {

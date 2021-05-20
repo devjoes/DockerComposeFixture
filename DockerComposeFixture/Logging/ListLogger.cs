@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DockerComposeFixture.Logging
 {
@@ -14,7 +13,6 @@ namespace DockerComposeFixture.Logging
         {
             
         }
-
         public void OnError(Exception error)
         {
             this.Log(error.Message + "\n" + error.StackTrace);

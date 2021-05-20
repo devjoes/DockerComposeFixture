@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 
 namespace DockerComposeFixture.Logging
 {
@@ -29,6 +27,5 @@ namespace DockerComposeFixture.Logging
             Debug.WriteLine(msg);
             Console.WriteLine(msg);
         }
-        
     }
 }
