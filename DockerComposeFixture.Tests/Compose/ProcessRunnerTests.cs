@@ -15,7 +15,12 @@ namespace DockerComposeFixture.Tests.Compose
         public void Execute_ReturnsOutput_WhenCalled()
         {
             var  logger = new Mock<ILogger>();
-            var runner = new ProcessRunner(new ProcessStartInfo("echo", "\"test1\ntest2\ntest3\""));
+            var psi = new ProcessStartInfo("echo", "\"test1\ntest2\ntest3\"");
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                psi = new ProcessStartInfo("cmd.exe", "/C \"echo test1& echo test2& echo test3\"");
+            }
+            var runner = new ProcessRunner(psi);
             runner.Subscribe(logger.Object);
             runner.Execute();
             logger.Verify(l => l.OnNext("test1"), Times.Once);
