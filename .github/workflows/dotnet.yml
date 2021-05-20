@@ -23,11 +23,12 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Package
-      #if: ${{ github.event_name == 'push' }}
+      if: ${{ github.event_name == 'push' }}
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
         PROJECT_FILE_PATH: ./DockerComposeFixture/DockerComposeFixture.csproj
         PACKAGE_NAME: dockercomposefixture
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -40,5 +41,8 @@ jobs:
 >>>>>>> Update dotnet.yml
 =======
         #NUGET_KEY: ${{ secrets.NUGET_KEY }}
+>>>>>>> Update dotnet.yml
+=======
+        NUGET_KEY: ${{ secrets.NUGET_KEY }}
 >>>>>>> Update dotnet.yml
         
