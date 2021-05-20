@@ -44,8 +44,7 @@ services:
 
         public void Dispose()
         {
-            //TODO: can't delete file because docker-compose down will fail
-            //File.Delete(this.dockerComposeFile);
+            File.Delete(this.dockerComposeFile);
         }
     }
 }
