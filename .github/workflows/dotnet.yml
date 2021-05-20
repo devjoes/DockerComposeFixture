@@ -28,21 +28,4 @@ jobs:
       with:
         PROJECT_FILE_PATH: ./DockerComposeFixture/DockerComposeFixture.csproj
         PACKAGE_NAME: dockercomposefixture
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
         NUGET_KEY: ${{ secrets.NUGET_KEY }}
-=======
-        NUGET_KEY: ${{ settings.NUGET_KEY }}
->>>>>>> Create dotnet.yml
-=======
-        NUGET_KEY: ${{ secrets.NUGET_KEY }}
->>>>>>> Update dotnet.yml
-=======
-        #NUGET_KEY: ${{ secrets.NUGET_KEY }}
->>>>>>> Update dotnet.yml
-=======
-        NUGET_KEY: ${{ secrets.NUGET_KEY }}
->>>>>>> Update dotnet.yml
-        
