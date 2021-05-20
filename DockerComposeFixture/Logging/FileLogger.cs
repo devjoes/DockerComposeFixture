@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace DockerComposeFixture.Logging
 {
@@ -30,7 +28,6 @@ namespace DockerComposeFixture.Logging
             this.Log(error.Message + "\n" + error.StackTrace);
             throw error;
         }
-
 
         public void OnNext(string value)
         {

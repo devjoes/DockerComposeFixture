@@ -1,22 +1,18 @@
 ﻿using DockerComposeFixture.Logging;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DockerComposeFixture.Compose
 {
     public class DockerCompose : IDockerCompose
     {
+        private string dockerComposeArgs, dockerComposeUpArgs, dockerComposeDownArgs;
+
         public DockerCompose(ILogger[] logger)
         {
             this.Logger = logger;
         }
-        private string dockerComposeArgs,dockerComposeUpArgs, dockerComposeDownArgs;
 
         public void Init(string dockerComposeArgs, string dockerComposeUpArgs, string dockerComposeDownArgs)
         {

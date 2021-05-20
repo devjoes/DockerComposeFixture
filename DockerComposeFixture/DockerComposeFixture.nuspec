@@ -3,7 +3,7 @@
   <metadata minClientVersion="2.12">
     <id>dockercomposefixture</id>
     <title>docker-compose Fixture</title>
-    <version>1.0.9</version>
+    <version>1.1.0</version>
     <authors>Joe Shearn</authors>
     <owners>Joe Shearn</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -12,7 +12,7 @@
     <copyright>Copyright 2018</copyright>
     <tags>XUnit Docker Compose</tags>
     <projectUrl>https://github.com/devjoes/DockerComposeFixture</projectUrl>
-    <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <licenseUrl>https://github.com/devjoes/DockerComposeFixture/LICENSE</licenseUrl>
     <dependencies>
       <dependency id="xunit" version="2.3.0" />
     </dependencies>
