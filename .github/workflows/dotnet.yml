@@ -26,7 +26,7 @@ jobs:
       #if: ${{ github.event_name == 'push' }}
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
-        PROJECT_FILE_PATH: ./DockerComposeFixture
+        PROJECT_FILE_PATH: ./DockerComposeFixture/DockerComposeFixture.csproj
         PACKAGE_NAME: dockercomposefixture
 <<<<<<< HEAD
 <<<<<<< HEAD
