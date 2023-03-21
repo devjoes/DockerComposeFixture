@@ -36,6 +36,7 @@ namespace DockerComposeFixture.Compose
 
             process.Start();
             process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             process.WaitForExit();
             process.CancelOutputRead();
 
