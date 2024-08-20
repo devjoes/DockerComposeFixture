@@ -30,7 +30,7 @@ services:
             dockerFixture.InitOnce(() => new DockerFixtureOptions
             {
                 DockerComposeFiles = new[] { this.dockerComposeFile },
-                CustomUpTest = output => output.Any(l => l.Contains("Server is listening"))
+                CustomUpTest = output => output.Any(l => l.Contains("server is listening"))
             });
         }
 
