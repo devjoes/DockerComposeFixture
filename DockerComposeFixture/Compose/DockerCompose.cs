@@ -23,7 +23,7 @@ namespace DockerComposeFixture.Compose
 
         public Task Up()
         {
-            var start = new ProcessStartInfo("docker-compose", $"{this.dockerComposeArgs} up {this.dockerComposeUpArgs}");
+            var start = new ProcessStartInfo("docker", $"compose {this.dockerComposeArgs} up {this.dockerComposeUpArgs}");
             return Task.Run(() =>  this.RunProcess(start) );
         }
 
@@ -42,13 +42,13 @@ namespace DockerComposeFixture.Compose
 
         public void Down()
         {
-            var down = new ProcessStartInfo("docker-compose", $"{this.dockerComposeArgs} down {this.dockerComposeDownArgs}");
+            var down = new ProcessStartInfo("docker", $"compose {this.dockerComposeArgs} down {this.dockerComposeDownArgs}");
             this.RunProcess(down);
         }
 
         public IEnumerable<string> Ps()
         {
-            var ps = new ProcessStartInfo("docker-compose", $"{this.dockerComposeArgs} ps");
+            var ps = new ProcessStartInfo("docker", $"compose {this.dockerComposeArgs} ps");
             var runner = new ProcessRunner(ps);
             var observerToQueue = new ObserverToQueue<string>();
 
