@@ -1,27 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DockerComposeFixture.Logging;
 using DockerComposeFixture.Tests.Utils;
+using FluentAssertions;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace DockerComposeFixture.Tests.Logging
 {
     public class LoggerTests
     {
-        public LoggerTests()
-        {
-        }
-
         [Fact]
-        public void OnNext_LogsItemsToFile_WhenCalled()
+        public async Task OnNext_LogsItemsToFile_WhenCalled()
         {
-            string tmpFile = Path.GetTempFileName();
+            var tmpFile = Path.GetTempFileName();
+            
             int GetFileLineCount(string file)
             {
                 using (var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Write))
@@ -40,16 +35,17 @@ namespace DockerComposeFixture.Tests.Logging
                 counter.Subscribe(logger);
             }
             
-            var task = new Task(() => counter.Count());
+            var task = new Task(() => counter.Count(delay: 10));
             
             task.Start();
-            Thread.Sleep(30);
-            Assert.True(GetFileLineCount(tmpFile) > 0);
-            Assert.True(GetFileLineCount(tmpFile) < 10);
-            task.Wait();
-            Assert.Equal(10, GetFileLineCount(tmpFile));
+            Thread.Sleep(50);
+            var fileLineCount = GetFileLineCount(tmpFile);
+            fileLineCount.Should().BeInRange(1, 9);
+            await task;
+            fileLineCount = GetFileLineCount(tmpFile);
+            fileLineCount.Should().Be(10);
             var lines = File.ReadAllLines(tmpFile);
-            Assert.Equal("1,2,3,4,5,6,7,8,9,10".Split(","), lines);
+            lines.Should().BeEquivalentTo("1,2,3,4,5,6,7,8,9,10".Split(","));
             File.Delete(tmpFile);
         }
     }
