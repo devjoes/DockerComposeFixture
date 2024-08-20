@@ -24,7 +24,7 @@ namespace DockerComposeFixture.Tests.Logging
             string tmpFile = Path.GetTempFileName();
             int GetFileLineCount(string file)
             {
-                using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Write))
+                using (var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Write))
                 using (var reader = new StreamReader(fs))
                 {
                     return reader.ReadToEnd()
