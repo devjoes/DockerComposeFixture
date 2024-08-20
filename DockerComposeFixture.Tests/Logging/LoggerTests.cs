@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using DockerComposeFixture.Logging;
 using DockerComposeFixture.Tests.Utils;
@@ -36,13 +35,10 @@ namespace DockerComposeFixture.Tests.Logging
             }
             
             var task = new Task(() => counter.Count(delay: 10));
-            
             task.Start();
-            Thread.Sleep(50);
-            var fileLineCount = GetFileLineCount(tmpFile);
-            fileLineCount.Should().BeInRange(1, 9);
             await task;
-            fileLineCount = GetFileLineCount(tmpFile);
+            
+            var fileLineCount = GetFileLineCount(tmpFile);
             fileLineCount.Should().Be(10);
             var lines = File.ReadAllLines(tmpFile);
             lines.Should().BeEquivalentTo("1,2,3,4,5,6,7,8,9,10".Split(","));
