@@ -25,8 +25,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Package
       if: ${{ github.event_name == 'push' }}
-      uses: brandedoutcast/publish-nuget@v2.5.5
-      with:
-        PROJECT_FILE_PATH: ./DockerComposeFixture/DockerComposeFixture.csproj
-        PACKAGE_NAME: dockercomposefixture
-        NUGET_KEY: ${{ secrets.NUGET_KEY }}
+      run: dotnet pack --no-build -c Release -o . ./DockerComposeFixture/DockerComposeFixture.csproj
+    - name: Publish
+      if: ${{ github.event_name == 'push' }}
+      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
