@@ -8,6 +8,7 @@ namespace DockerComposeFixture.Compose
     {
         void Init(string dockerComposeArgs, string dockerComposeUpArgs, string dockerComposeDownArgs);
         void Down();
+        IEnumerable<string> Ps();
         IEnumerable<string> PsWithJsonFormat();
         Task Up();
         int PauseMs { get; }
