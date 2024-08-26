@@ -70,6 +70,5 @@ namespace DockerComposeFixture.Compose
                     this.observers.Remove(this.observer);
             }
         }
-
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using DockerComposeFixture.Compose;
 using DockerComposeFixture.Logging;
 using Moq;

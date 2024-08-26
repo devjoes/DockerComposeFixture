@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DockerComposeFixture
 {
@@ -52,7 +50,5 @@ namespace DockerComposeFixture
                 throw new ArgumentException(nameof(this.DockerComposeFiles));
             }
         }
-
-
     }
 }

@@ -152,8 +152,7 @@ namespace DockerComposeFixture.Tests
             compose.Verify(c => c.Up(), Times.Once);
             compose.Verify(c => c.PsWithJsonFormat(), Times.AtLeast(5));
         }
-
-
+        
         [Fact]
         public void Init_Throws_WhenServicesFailToStart()
         {
@@ -171,7 +170,6 @@ namespace DockerComposeFixture.Tests
             Assert.Throws<DockerComposeException>(() =>
                 new DockerFixture(null).Init(new[] { Path.GetTempFileName() }, "up", "down", 120, null, compose.Object));
         }
-
 
         [Fact]
         public void Init_Throws_DockerComposeExitsPrematurely()
@@ -227,9 +225,7 @@ namespace DockerComposeFixture.Tests
                     () => new DockerFixtureOptions { DockerComposeFiles = new[] { "docker-compose.yml" }, StartupTimeoutSecs = -1 },
                     compose.Object));
         }
-
-
-
+        
         [Fact]
         public void Dispose_CallsDown_WhenRun()
         {
@@ -246,6 +242,5 @@ namespace DockerComposeFixture.Tests
 
             compose.Verify(c => c.Down(), Times.Once);
         }
-
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace DockerComposeFixture.Tests.Utils
@@ -8,6 +7,7 @@ namespace DockerComposeFixture.Tests.Utils
     public class ObservableCounter:IObservable<string>
     {
         private readonly List<IObserver<string>> observalbes = new List<IObserver<string>>();
+        
         public IDisposable Subscribe(IObserver<string> observer)
         {
             this.observalbes.Add(observer);

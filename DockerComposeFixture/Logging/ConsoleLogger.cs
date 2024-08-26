@@ -15,8 +15,7 @@ namespace DockerComposeFixture.Logging
             this.Log(error.Message + "\n" + error.StackTrace);
             throw error;
         }
-
-
+        
         public void OnNext(string value)
         {
             this.Log(value);

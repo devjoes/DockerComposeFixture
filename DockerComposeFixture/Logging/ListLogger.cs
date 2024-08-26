@@ -9,6 +9,7 @@ namespace DockerComposeFixture.Logging
         {
             this.LoggedLines = new List<string>();
         }
+        
         public void OnCompleted()
         {
             

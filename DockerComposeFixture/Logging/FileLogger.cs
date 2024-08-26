@@ -18,6 +18,7 @@ namespace DockerComposeFixture.Logging
             }
             this.logfileName = logfileName;
         }
+        
         public void OnCompleted()
         {
             
@@ -43,7 +44,6 @@ namespace DockerComposeFixture.Logging
                 writer.Flush();
                 writer.Close();
             }
-
         }
     }
 }

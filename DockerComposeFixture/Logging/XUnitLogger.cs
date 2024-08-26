@@ -24,7 +24,6 @@ namespace DockerComposeFixture.Logging
             throw error;
         }
 
-
         public void OnNext(string value)
         {
             this.Log(value);
@@ -34,6 +33,5 @@ namespace DockerComposeFixture.Logging
         {
             this.xlogOutput.OnMessage(new DiagnosticMessage(msg));
         }
-
     }
 }
