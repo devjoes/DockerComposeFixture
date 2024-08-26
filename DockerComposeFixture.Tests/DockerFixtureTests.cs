@@ -242,5 +242,12 @@ namespace DockerComposeFixture.Tests
 
             compose.Verify(c => c.Down(), Times.Once);
         }
+
+        [Fact]
+        public void Dispose_WithoutInit_DoesNotThrow()
+        {
+            var fixture = new DockerFixture(null);
+            fixture.Dispose();
+        }
     }
 }

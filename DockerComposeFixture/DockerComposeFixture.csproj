@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <IsTestProject>false</IsTestProject>
     <Authors>Joe Shearn</Authors>
     <Product>Docker Compose Fixture</Product>
@@ -13,8 +13,8 @@
     <PackageLicenseUrl>https://github.com/devjoes/DockerComposeFixture/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/devjoes/DockerComposeFixture</RepositoryUrl>
     <PackageTags>docker docker-compose xunit</PackageTags>
-    <PackageReleaseNotes>Fix issue whereby currently running docker compose was not detected</PackageReleaseNotes>
-    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <PackageReleaseNotes>Do not throw null reference if fixture is disposed of without being initialized.</PackageReleaseNotes>
+    <AssemblyVersion>1.2.2.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

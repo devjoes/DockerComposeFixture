@@ -248,9 +248,10 @@ namespace DockerComposeFixture
 
         private void Stop()
         {
-            this.dockerCompose.Down();
+            if (this.dockerCompose != null)
+            {
+                this.dockerCompose.Down();
+            }
         }
-
-
     }
 }
