@@ -45,10 +45,25 @@ namespace DockerComposeFixture.Compose
             var down = new ProcessStartInfo("docker", $"compose {this.dockerComposeArgs} down {this.dockerComposeDownArgs}");
             this.RunProcess(down);
         }
-
+        
         public IEnumerable<string> Ps()
         {
             var ps = new ProcessStartInfo("docker", $"compose {this.dockerComposeArgs} ps");
+            var runner = new ProcessRunner(ps);
+            var observerToQueue = new ObserverToQueue<string>();
+
+            foreach (var logger in this.Logger)
+            {
+                runner.Subscribe(logger);
+            }
+            runner.Subscribe(observerToQueue);
+            runner.Execute();
+            return observerToQueue.Queue.ToArray();
+        }
+        
+        public IEnumerable<string> PsWithJsonFormat()
+        {
+            var ps = new ProcessStartInfo("docker", $"compose {this.dockerComposeArgs} ps --format json");
             var runner = new ProcessRunner(ps);
             var observerToQueue = new ObserverToQueue<string>();
 

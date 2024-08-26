@@ -235,17 +235,15 @@ namespace DockerComposeFixture
             }
             throw new DockerComposeException(this.loggers.GetLoggedLines());
         }
-
+        
         private (bool hasContainers, bool containersAreUp) CheckIfRunning()
         {
-            var lines = this.dockerCompose.Ps().ToList()
-                .Where(l => l != null)
-                .SkipWhile(l => !l.Contains("--------"))
-                .Skip(1)
+            var lines = dockerCompose.PsWithJsonFormat()
+                .Where(l => l != null && l.StartsWith("{"))
                 .ToList();
             return (
                 lines.Any(),
-                lines.Count(l => Regex.IsMatch(l, @"\s+Up\s+")) == lines.Count());
+                lines.Count(l => l.Contains("\"Status\": \"Up")) == lines.Count);
         }
 
         private void Stop()
