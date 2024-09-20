@@ -21,6 +21,7 @@ namespace DockerComposeFixture
         private ILogger[] loggers;
         private int startupTimeoutSecs;
         private readonly IMessageSink output;
+        private ushort[] requiredPorts;
 
         public DockerFixture(IMessageSink output)
         {
@@ -31,7 +32,7 @@ namespace DockerComposeFixture
         /// Initialize docker compose services from file(s) but only once.
         /// If you call this multiple times on the same DockerFixture then it will be ignored.
         /// </summary>
-        /// <param name="setupOptions">Options that control how docker-compose is executed.</param>
+        /// <param name="setupOptions">Options that control how docker compose is executed.</param>
         public void InitOnce(Func<IDockerFixtureOptions> setupOptions)
         {
             InitOnce(setupOptions, null);
@@ -41,7 +42,7 @@ namespace DockerComposeFixture
         /// Initialize docker compose services from file(s) but only once.
         /// If you call this multiple times on the same DockerFixture then it will be ignored.
         /// </summary>
-        /// <param name="setupOptions">Options that control how docker-compose is executed.</param>
+        /// <param name="setupOptions">Options that control how docker compose is executed.</param>
         /// <param name="dockerCompose"></param>
         public void InitOnce(Func<IDockerFixtureOptions> setupOptions, IDockerCompose dockerCompose)
         {
@@ -56,7 +57,7 @@ namespace DockerComposeFixture
         /// <summary>
         /// Initialize docker compose services from file(s).
         /// </summary>
-        /// <param name="setupOptions">Options that control how docker-compose is executed</param>
+        /// <param name="setupOptions">Options that control how docker compose is executed</param>
         public void Init(Func<IDockerFixtureOptions> setupOptions)
         {
             Init(setupOptions, null);
@@ -65,18 +66,25 @@ namespace DockerComposeFixture
         /// <summary>
         /// Initialize docker compose services from file(s).
         /// </summary>
-        /// <param name="setupOptions">Options that control how docker-compose is executed</param>
+        /// <param name="setupOptions">Options that control how docker compose is executed</param>
         /// <param name="compose"></param>
         public void Init(Func<IDockerFixtureOptions> setupOptions, IDockerCompose compose)
         {
             var options = setupOptions();
             options.Validate();
-            string logFile = options.DebugLog
+            var logFile = options.DebugLog
                 ? Path.Combine(Path.GetTempPath(), $"docker-compose-{DateTime.Now.Ticks}.log")
                 : null;
 
-            this.Init(options.DockerComposeFiles, options.DockerComposeUpArgs, options.DockerComposeDownArgs,
-                options.StartupTimeoutSecs, options.CustomUpTest, compose, this.GetLoggers(logFile).ToArray());
+            this.Init(
+                options.DockerComposeFiles, 
+                options.DockerComposeUpArgs,
+                options.DockerComposeDownArgs,
+                options.StartupTimeoutSecs,
+                options.CustomUpTest,
+                compose, 
+                this.GetLoggers(logFile).ToArray(), 
+                options.RequiredPorts);
         }
 
         private IEnumerable<ILogger> GetLoggers(string file)
@@ -97,15 +105,16 @@ namespace DockerComposeFixture
         /// Initialize docker compose services from file(s).
         /// </summary>
         /// <param name="dockerComposeFiles">Array of docker compose files</param>
-        /// <param name="dockerComposeUpArgs">Arguments to append after 'docker-compose -f file.yml up'</param>
-        /// <param name="dockerComposeDownArgs">Arguments to append after 'docker-compose -f file.yml down'</param>
+        /// <param name="dockerComposeUpArgs">Arguments to append after 'docker compose -f file.yml up'</param>
+        /// <param name="dockerComposeDownArgs">Arguments to append after 'docker compose -f file.yml down'</param>
         /// <param name="startupTimeoutSecs">How long to wait for the application to start before giving up</param>
-        /// <param name="customUpTest">Checks whether the docker-compose services have come up correctly based upon the output of docker-compose</param>
+        /// <param name="customUpTest">Checks whether the docker compose services have come up correctly based upon the output of docker compose</param>
         /// <param name="dockerCompose"></param>
         /// <param name="logger"></param>
+        /// <param name="requiredPorts">Checks that these ports are available on the host network (not in use by other processes)</param>
         public void Init(string[] dockerComposeFiles, string dockerComposeUpArgs, string dockerComposeDownArgs,
             int startupTimeoutSecs, Func<string[], bool> customUpTest = null,
-            IDockerCompose dockerCompose = null, ILogger[] logger = null)
+            IDockerCompose dockerCompose = null, ILogger[] logger = null, ushort[] requiredPorts = null)
         {
             this.loggers = logger ?? GetLoggers(null).ToArray();
 
@@ -113,6 +122,7 @@ namespace DockerComposeFixture
             this.dockerCompose = dockerCompose ?? new DockerCompose(this.loggers);
             this.customUpTest = customUpTest;
             this.startupTimeoutSecs = startupTimeoutSecs;
+            this.requiredPorts = requiredPorts;
 
             this.dockerCompose.Init(
                 string.Join(" ",
@@ -129,7 +139,7 @@ namespace DockerComposeFixture
                 return file;
             }
 
-            DirectoryInfo curDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            var curDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             if (File.Exists(Path.Combine(curDir.FullName, file)))
             {
                 return Path.Combine(curDir.FullName, file);
@@ -139,7 +149,7 @@ namespace DockerComposeFixture
             {
                 while (curDir != null)
                 {
-                    string curFile = Path.Combine(curDir.FullName, file);
+                    var curFile = Path.Combine(curDir.FullName, file);
                     if (File.Exists(curFile))
                     {
                         return curFile;
@@ -169,7 +179,7 @@ namespace DockerComposeFixture
         /// <returns></returns>
         public static async Task Kill(Regex filterRx, bool killEverything = false)
         {
-            Process ps = Process.Start(new ProcessStartInfo("docker", "ps")
+            var ps = Process.Start(new ProcessStartInfo("docker", "ps")
             {
                 UseShellExecute = false,
                 RedirectStandardOutput = true
@@ -187,7 +197,6 @@ namespace DockerComposeFixture
             {
                 Process.Start("docker", $"kill {id}").WaitForExit();
             }
-
         }
 
         public virtual void Dispose()
@@ -203,14 +212,21 @@ namespace DockerComposeFixture
                 this.Stop();
             }
 
+            if (requiredPorts != null && requiredPorts.Length > 0)
+            {
+                this.loggers.Log("---- checking for port availability ----");
+                this.CheckForRequiredPorts();
+                this.loggers.Log("---- all required host ports are available ----");
+            }
+
             this.loggers.Log("---- starting docker services ----");
             var upTask = this.dockerCompose.Up();
 
-            for (int i = 0; i < this.startupTimeoutSecs; i++)
+            for (var i = 0; i < this.startupTimeoutSecs; i++)
             {
                 if (upTask.IsCompleted)
                 {
-                    this.loggers.Log("docker-compose exited prematurely");
+                    this.loggers.Log("docker compose exited prematurely");
                     break;
                 }
                 this.loggers.Log($"---- checking docker services ({i + 1}/{this.startupTimeoutSecs}) ----");
@@ -235,7 +251,16 @@ namespace DockerComposeFixture
             }
             throw new DockerComposeException(this.loggers.GetLoggedLines());
         }
-        
+
+        private void CheckForRequiredPorts()
+        {
+            var usedPorts = Ports.DetermineUtilizedPorts(requiredPorts);
+            if (usedPorts.Any())
+            {
+                throw new PortsUnavailableException(this.loggers.GetLoggedLines(), usedPorts);
+            }
+        }
+
         private (bool hasContainers, bool containersAreUp) CheckIfRunning()
         {
             var lines = dockerCompose.PsWithJsonFormat()

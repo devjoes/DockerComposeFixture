@@ -4,6 +4,7 @@ namespace DockerComposeFixture
 {
     public interface IDockerFixtureOptions
     {
+        UInt16[] RequiredPorts { get; set; }
         Func<string[], bool> CustomUpTest { get; set; }
         string[] DockerComposeFiles { get; set; }
         bool DebugLog { get; set; }

@@ -16,7 +16,7 @@ namespace DockerComposeFixture.Tests.Utils
 
         public void Count(int min = 1, int max = 10, int delay = 10)
         {
-            for (int i = min; i <= max; i++)
+            for (var i = min; i <= max; i++)
             {
                 this.observalbes.ForEach(o => o.OnNext(i.ToString()));
                 Thread.Sleep(delay);

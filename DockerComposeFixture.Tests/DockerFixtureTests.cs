@@ -125,7 +125,7 @@ namespace DockerComposeFixture.Tests
         [Fact]
         public void Init_MonitorsServices_WhenTheyStartSlowly()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             var compose = new Mock<IDockerCompose>();
             compose.Setup(c => c.PauseMs).Returns(100);
             compose.Setup(c => c.Up())
@@ -158,7 +158,7 @@ namespace DockerComposeFixture.Tests
         {
             var compose = new Mock<IDockerCompose>();
             compose.Setup(c => c.PauseMs).Returns(NumberOfMsInOneSec);
-            bool firstTime = true;
+            var firstTime = true;
             compose.Setup(c => c.PsWithJsonFormat())
                 .Returns(() =>
                 {
@@ -191,7 +191,7 @@ namespace DockerComposeFixture.Tests
             compose.Setup(c => c.PsWithJsonFormat())
                 .Returns(new[] { "non-json-message", "{ \"Status\": \"Up 3 seconds\" }", "{ \"Status\": \"Up 15 seconds\" }" });
 
-            string fileDoesntExist = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var fileDoesntExist = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Assert.Throws<ArgumentException>(() =>
                 new DockerFixture(null).Init(new[] { fileDoesntExist }, "up", "down", 120, null, compose.Object));
         }
