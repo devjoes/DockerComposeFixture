@@ -42,6 +42,8 @@ services:
             Assert.Contains("hello world", response);
         }
 
+        
+        
         public void Dispose()
         {
             File.Delete(this.dockerComposeFile);
