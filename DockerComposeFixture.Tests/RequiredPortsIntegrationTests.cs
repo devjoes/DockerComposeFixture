@@ -53,6 +53,7 @@ services:
     [Fact]
     public void GivenRequiredPortInUse_ThenExceptionIsThrownWithPortNumber()
     {
+        // Arrange
         const ushort portToOccupy = 12871;
         var ipEndPoint = new IPEndPoint(IPAddress.Loopback, portToOccupy);
         using Socket listener = new(
@@ -62,6 +63,7 @@ services:
         listener.Bind(ipEndPoint);
         listener.Listen();
         
+        // Act & Assert
         var thrownException = Assert.Throws<PortsUnavailableException>(() =>
         {
             dockerFixture.InitOnce(() => new DockerFixtureOptions
