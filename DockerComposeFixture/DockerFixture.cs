@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using DockerComposeFixture.Compose;
 using DockerComposeFixture.Exceptions;
 using DockerComposeFixture.Logging;
-using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace DockerComposeFixture
 {
