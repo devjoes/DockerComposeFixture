@@ -2,9 +2,10 @@
 
 namespace DockerComposeFixture.Exceptions
 {
-    public class DockerComposeException:Exception
+    public class DockerComposeException : Exception
     {
-        public DockerComposeException(string[] loggedLines):base($"docker-compose failed - see {nameof(DockerComposeOutput)} property")
+        public DockerComposeException(string[] loggedLines)
+            : base($"docker compose failed - see {nameof(DockerComposeOutput)} property")
         {
             this.DockerComposeOutput = loggedLines;
         }

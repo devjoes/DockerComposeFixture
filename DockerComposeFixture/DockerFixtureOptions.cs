@@ -3,12 +3,21 @@
 namespace DockerComposeFixture
 {
     /// <summary>
-    /// Options that control how docker-compose is executed
+    /// Options that control how docker compose is executed
     /// </summary>
     public class DockerFixtureOptions : IDockerFixtureOptions
     {
         /// <summary>
-        /// Checks whether the docker-compose services have come up correctly based upon the output of docker-compose
+        /// An array of ports required to be available on the host in order for the docker compose services
+        /// to start. Provides a fail-fast check along with aiding developers to easier debug issues related
+        /// to running other programs locally with clashing ports.
+        /// If null or empty - no ports are checked.
+        /// If any required ports are reserved by other processes - throws an 'PortsUnavailableException'.
+        /// </summary>
+        public ushort[] RequiredPorts { get; set; }
+
+        /// <summary>
+        /// Checks whether the docker compose services have come up correctly based upon the output of docker compose
         /// </summary>
         public Func<string[], bool> CustomUpTest { get; set; }
 
@@ -19,17 +28,17 @@ namespace DockerComposeFixture
         /// </summary>
         public string[] DockerComposeFiles { get; set; } = new[] { "docker-compose.yml" };
         /// <summary>
-        /// When true this logs docker-compose output to %temp%\docker-compose-*.log
+        /// When true this logs docker compose output to %temp%\docker-compose-*.log
         /// </summary>
         public bool DebugLog { get; set; }
         /// <summary>
-        /// Arguments to append after 'docker-compose -f file.yml up'
-        /// Default is 'docker-compose -f file.yml up' you can append '--build' if you want it to always build
+        /// Arguments to append after 'docker compose -f file.yml up'
+        /// Default is 'docker compose -f file.yml up' you can append '--build' if you want it to always build
         /// </summary>
         public string DockerComposeUpArgs { get; set; } = "";
         /// <summary>
-        /// Arguments to append after 'docker-compose -f file.yml down'
-        /// Default is 'docker-compose -f file.yml down --remove-orphans' you can add '--rmi all' if you want to guarantee a fresh build on each test
+        /// Arguments to append after 'docker compose -f file.yml down'
+        /// Default is 'docker compose -f file.yml down --remove-orphans' you can add '--rmi all' if you want to guarantee a fresh build on each test
         /// </summary>
         public string DockerComposeDownArgs { get; set; } = "--remove-orphans";
 
